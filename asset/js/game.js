@@ -5,7 +5,11 @@ let bettingAmount = document.querySelectorAll('.amount')
 let returnselectedhere = document.querySelector('.returnselectedhere');
 let bubblesleg = document.querySelector('.bles-legs');
 let gameResult = document.querySelector('.game-result');
+let balance = document.querySelector('.ballance');
 let animation = ['fallout', 'moveleft'];
+let bAmountWrapper = document.querySelector('.game-amount');
+let selectedAmount = document.querySelector('.selectedAmount');
+
 
 
 
@@ -212,14 +216,76 @@ function _returnColor_(){
         
     }
 }
-window.addEventListener('load', function(){
-    _returnColor_();
-})
+
+// getting user betting amount 
+function getBettingAmount(){
+let amount = document.querySelector('.selectedAmount');
+
+    return amount ? amount.getAttribute('data-value') : null;
+}
+
+// get user balance
+function getBalance(){
+    let amount = localStorage.getItem('GameBalance');
+    return amount ? amount : null;
+}
+console.log(getBalance());
+
 
 startBtn.onclick = function(){
     //game starter
     let gameStart = 0;
+
+    let walletfundwraper = document.querySelector('.fundaccount');
     gameResult.innerHTML = '';
+
+    if(retrivefromstorage().length != 6){
+        notification('please select 6 random number!', '<i class="fas fa-angry-face"></i>', '');
+        close();
+        return;
+    }
+// checking if user select betting amount
+    if(getBettingAmount() == null) {
+        notification('select betting amount', '<i class="fas fa-angry-face"></i>', '');
+        close();
+        return;
+
+    }
+    //checking if current game balance is less than betting amount
+    if(getBalance() < getBettingAmount()){
+        notification('wallet balance is low, fund your amount', '<i class="fas fa-angry-face"></i>', ''); 
+        close();
+
+        // start generating new element here that will allow users to fund their wallet if wallet is too low
+
+      if(walletfundwraper === null){
+
+        let wrp = document.createElement('DIV');
+        wrp.className = 'fundaccount';
+
+        let input = document.createElement('input');
+            input.className = 'f-accountInput';
+            input.type = 'text';
+            input.placeholder = 'Enter Amount';
+
+        let btn = document.createElement('button');
+            btn.className = 'f-accountBtn';
+            btn.innerHTML = '<i class="fas fa-wallet"></i>';
+            btn.setAttribute('onclick', 'fundwallet()');
+            
+            wrp.appendChild(input);
+            wrp.appendChild(btn);
+
+        bAmountWrapper.insertAdjacentElement('afterend', wrp); 
+      }  
+          
+
+        return;
+    }
+
+// subtract betting amount from the current balance
+    updateBalance('subtract', getBettingAmount());
+
  //generating fallout animation span
 
  for(let x=0; x< 2; x++){
@@ -262,4 +328,56 @@ startBtn.onclick = function(){
    
  }, 2000)
 }
+function updateBalance(type, amount){
+    let newAmount = '';
+
+    if(type == 'subtract'){
+        newAmount = getBalance() - amount;
+    }
+
+    if(type == 'add'){
+        newAmount = getBalance() + amount;
+    }
+// updating account balance
+    balance.innerHTML = newAmount;
+
+    localStorage.setItem('GameBalance', newAmount); //saving the new balance to storage
+}
+
+// allow wallet using input
+function fundwallet(){
+    let fInput = document.querySelector('.f-accountInput');
+
+    if(fInput.value == '' || isNaN(fInput.value)){
+        notification('Enter a valid funding amount', '<i class="fas fa-angry-face"></i>', ''); 
+        close();
+        return;
+    }
+
+    // checking if funding amount is bellow or less than min amount
+    if(fInput.value < 100){
+        notification('Minimum funding amount is &#8358;100', '<i class="fas fa-angry-face"></i>', ''); 
+        close();
+        return;
+    }
+
+    localStorage.setItem('GameBalance', getBalance() + fInput.value);
+    notification(`Congrats,wallet fund  succesfully with &#8358;${fInput.value}`, '<i class="fas fa-angry-face"></i>', ''); 
+    close();
+    balance.innerHTML = getBalance();
+}
+
+window.addEventListener('load', function(){
+    _returnColor_();
+
+
+// trying to set default 1500 wallet balance if it not already set
+
+    if(localStorage.getItem('GameBalance') == null){
+        localStorage.setItem('GameBalance', 1500);
+    }
+
+    balance.innerHTML = getBalance();
+
+})
 

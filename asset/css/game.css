@@ -405,6 +405,21 @@
     animation: role 2s infinite linear;
   }
 
+  .fundaccount{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .fundaccount input{
+    padding: 0 5px;
+    font-weight: 500;
+  }
+  .fundaccount input:focus{
+    border: 0.023px solid darkred;
+    border-radius: 5px;
+    outline: none;
+  }
+
   @keyframes dropout{
     0%{
         top: -30px;
